@@ -1,4 +1,5 @@
 #goal of this task is to create to-do list to increase productivity of my days and get better at Python
+import uuid
 """
 #1 define functions (tools)
 def create_tasks(my_goals):
@@ -42,10 +43,8 @@ class TodoApp():
         self.my_goals = []
         try:
             with open("tasks.txt", "r", encoding="utf-8") as file:
-                # přečteme řádky a zbavíme se neviditelných znaků \n na konci
                 self.my_goals = [line.strip() for line in file.readlines()]
         except FileNotFoundError:
-            # Pokud soubor ještě neexistuje (první spuštění), nic se neděje
             self.my_goals = []
 
     def save_tasks(self):
@@ -61,9 +60,14 @@ class TodoApp():
             print("Goal added!")
         else:
             print("Error: Empty goal can't be added!")
+
     def display_tasks(self):
         for index, goal in enumerate(self.my_goals, start=1):  # Start = 1 means that first task is going to have number one but index is still the same which has to be handled
-            print(f"{index}) {goal}")
+            if goal.startswith("DONE:"):
+                print(f"{index}) [✔] {goal.replace('DONE: ', '')}")
+            else:
+                print(f"{index}) [ ] {goal}")
+
     def update_tasks(self):
         for index, goal in enumerate(self.my_goals, start=1):
             print(f"{index}, {goal}")
@@ -92,9 +96,19 @@ class TodoApp():
         except IndexError:
             print("Nothing was deleted! Please enter a valid number of goal!")
 
+    def mark_done(self):
+        self.display_tasks()
+        done_index = int(input("Which number of goal you would like to set as done? ")) - 1
+        if self.my_goals[done_index].startswith ("DONE:"):
+            pass
+        else:
+            self.my_goals[done_index] = "DONE:" + self.my_goals[done_index]
+            self.save_tasks()
+            print("Goal was successfully marked as done!")
+
     def run(self):
        while True:
-           choice = input ("\nC - create, R - read, U - update, D - delete, E - exit: ").upper().strip()
+           choice = input ("\nC - create, R - read, U - update, D - delete, M - mark, E - exit: ").upper().strip()
            if choice == "C":
                 self.create_tasks()
            elif choice == "R":
@@ -103,6 +117,8 @@ class TodoApp():
                 self.update_tasks()
            elif choice == "D":
                 self.delete_tasks()
+           elif choice == "M":
+                self.mark_done()
            elif choice == "E":
                print("Goodbye!")
                break #End of app
