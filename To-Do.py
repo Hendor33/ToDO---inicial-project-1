@@ -45,6 +45,7 @@ class TodoApp():
         self.load_tasks()
 
     def save_tasks(self):
+        self.my_goals.sort(key=lambda x: x["priority"], reverse=True)
         with open("goals.json", "w") as file:
             json.dump(self.my_goals, file)
 
@@ -56,26 +57,42 @@ class TodoApp():
             self.my_goals = []
     def create_tasks(self):
         new_goal = input("What is the new goal?: ").strip()
-        try:
-            priority = int(input("What is the priority?: 1 - small / 2 - medium / 3 - high "))
-            new_task_data = {
-                "task": new_goal,
-                "priority": priority,
-                "done": False
-            }
-            self.my_goals.append(new_task_data)
-            self.save_tasks()
-            print("Goal added!")
-        except ValueError:
-            (print("Priority must be between 1 and 3!"))
+        while True:
+            try:
+                priority = int(input("What is the priority?: 1 - small / 2 - medium / 3 - high "))
+                if 1 <= priority <= 3:
+                    new_task_data = {
+                        "task": new_goal,
+                        "priority": priority,
+                        "done": False
+                    }
+                    self.my_goals.append(new_task_data)
+                    self.save_tasks()
+                    print("Goal added!")
+                    break
+                else:
+                     print("Please enter number in between 1 and 3!")
+
+            except ValueError:
+                (print("Priority must be between 1 and 3!"))
 
     def display_tasks(self):
+        #add logic of no goals found
+
+        priority_labels = {
+            1: "small",
+            2: "medium",
+            3: "high"
+        }
+        self.my_goals.sort(key = lambda x: x["priority"], reverse = True)
+
         for index, goal in enumerate(self.my_goals, start=1): # Start = 1 means that first task is going to have number one but index is still the same which has to be handled
             task_text = goal["task"]
             if goal["done"]:
                 print(f"{index}) [✔] {task_text}")
             else:
-                print(f"{index}) [ ] {task_text}")
+                prio_name = prio_name = priority_labels[goal["priority"]]
+                print(f"{index}) [ ] {task_text} - priority {prio_name}")
 
     def update_tasks(self):
         for index, goal in enumerate(self.my_goals, start=1):
