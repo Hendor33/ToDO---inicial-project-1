@@ -98,13 +98,19 @@ class TodoApp():
 
     def mark_done(self):
         self.display_tasks()
-        done_index = int(input("Which number of goal you would like to set as done? ")) - 1
-        if self.my_goals[done_index].startswith ("DONE:"):
-            pass
-        else:
-            self.my_goals[done_index] = "DONE:" + self.my_goals[done_index]
-            self.save_tasks()
-            print("Goal was successfully marked as done!")
+        try:
+            done_index = int(input("Which number of goal you would like to set as done? ")) - 1
+            test_exists = self.my_goals[done_index]
+            if self.my_goals[done_index].startswith ("DONE:"):
+                pass
+            else:
+                self.my_goals[done_index] = "DONE:" + self.my_goals[done_index]
+                self.save_tasks()
+                print("Goal was successfully marked as done!")
+        except ValueError:
+            print("Please enter a valid number of goal!")
+        except IndexError:
+            print("Please enter a valid number of goal!")
 
     def run(self):
        while True:
