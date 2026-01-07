@@ -1,6 +1,8 @@
 #goal of this task is to create to-do list to increase productivity of my days and get better at Python
 import uuid
 import json
+from datetime import datetime
+
 """
 #1 define functions (tools)
 def create_tasks(my_goals):
@@ -56,6 +58,8 @@ class TodoApp():
         except FileNotFoundError:
             self.my_goals = []
     def create_tasks(self):
+        now = datetime.now()
+        timestamp = now.strftime("%d.%m.%Y - %H:%M")
         new_goal = input("What is the new goal?: ").strip()
         while True:
             try:
@@ -64,7 +68,8 @@ class TodoApp():
                     new_task_data = {
                         "task": new_goal,
                         "priority": priority,
-                        "done": False
+                        "done": False,
+                        "created_at": timestamp
                     }
                     self.my_goals.append(new_task_data)
                     self.save_tasks()
@@ -77,22 +82,25 @@ class TodoApp():
                 (print("Priority must be between 1 and 3!"))
 
     def display_tasks(self):
-        #add logic of no goals found
+        if not self.my_goals:
+            print("There are no goals!")
+        else:
+            priority_labels = {
+                1: "\033[92msmall\033[0m",
+                2: "\033[93mmedium\033[0m",
+                3: "\033[91mhigh\033[0m"
+            }
+            self.my_goals.sort(key = lambda x: x["priority"], reverse = True)
 
-        priority_labels = {
-            1: "small",
-            2: "medium",
-            3: "high"
-        }
-        self.my_goals.sort(key = lambda x: x["priority"], reverse = True)
 
-        for index, goal in enumerate(self.my_goals, start=1): # Start = 1 means that first task is going to have number one but index is still the same which has to be handled
-            task_text = goal["task"]
-            if goal["done"]:
-                print(f"{index}) [✔] {task_text}")
-            else:
-                prio_name = prio_name = priority_labels[goal["priority"]]
-                print(f"{index}) [ ] {task_text} - priority {prio_name}")
+            for index, goal in enumerate(self.my_goals, start=1): # Start = 1 means that first task is going to have number one but index is still the same which has to be handled
+                task_text = goal.get("task", "Unknown task")
+                datum = goal.get("created_at", "Unknown date")
+                if goal["done"]:
+                    print(f"{index}) [✔] {task_text} - ({datum})")
+                else:
+                    prio_name = priority_labels[goal["priority"]]
+                    print(f"{index}) [ ] {task_text} - priority {prio_name} - ({datum})")
 
     def update_tasks(self):
         for index, goal in enumerate(self.my_goals, start=1):
@@ -101,7 +109,7 @@ class TodoApp():
             update_index = int(input("Which number of goal you would like to update? ")) - 1  # That final -1 is to handle the index X position problem
             test_exists = self.my_goals[update_index]  # check number of goal whether it exists
 
-            update_goal = input("What is the new goal?: ")
+            update_goal = input("What is the updated name of goal?: ")
             self.my_goals[update_index]["task"] = update_goal
             self.save_tasks()
         except ValueError:
@@ -122,20 +130,30 @@ class TodoApp():
         except IndexError:
             print("Nothing was deleted! Please enter a valid number of goal!")
 
+    def set_goal_done(self, index):
+        if self.my_goals[index]["done"]:
+            return False  # Nic jsme nezměnili, už to bylo hotové
+
+        self.my_goals[index]["done"] = True
+        return True  # Úspěšně změněno
+
     def mark_done(self):
         self.display_tasks()
         try:
             done_index = int(input("Which number of goal you would like to set as done? ")) - 1
-            if self.my_goals[done_index]["done"] == True:
-               print("This goal is already done!")
-            else:
-                self.my_goals[done_index]["done"] = True
+            was_updated = self.set_goal_done(done_index)
+
+            if was_updated:
                 self.save_tasks()
-                print("Goal was successfully marked as done!")
+                print(f"Goal '{self.my_goals[done_index]['task']}' was successfully marked as done!")
+            else:
+                print(f"Goal '{self.my_goals[done_index]['task']}' is already done!")
+
         except ValueError:
             print("Please enter a valid number of goal, do not use letters or special characters!")
         except IndexError:
             print("Please enter a valid number of goal!")
+
 
     def run(self):
        while True:
